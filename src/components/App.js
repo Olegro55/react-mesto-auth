@@ -1,5 +1,6 @@
 import React from 'react';
-import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
+
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -8,10 +9,17 @@ import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import ImagePopup from './ImagePopup';
+import Register from "./Register";
+import Login from "./Login";
+import ProtectedRoute from "./ProtectedRoute";
+
 import api from '../utils/api';
+import auth from '../utils/auth';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 
 function App() {
+
+  const navigate = useNavigate();
 
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = React.useState(false);
@@ -23,6 +31,24 @@ function App() {
     avatar: '',
   });
   const [cards, setCards] = React.useState([]);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+
+  React.useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      auth
+        .checkToken(token)
+        .then((res) => {
+          setEmail(res.data.email);
+          setIsLoggedIn(true);
+          navigate("/");
+        })
+        .catch((err) => {
+          console.error(`Ошибка: ${err}`);
+        });
+    }
+  }, []);
 
   React.useEffect(() => {
     Promise.all([api.getUserInfo(), api.getInitialCards()])
@@ -65,7 +91,6 @@ function App() {
         console.error(`Ошибка: ${err}`);
       });
   }
-
   function handleUpdateUser(data) {
     api.setUserInfo(data)
       .then((userData) => {
@@ -96,27 +121,49 @@ function App() {
         console.error(`Ошибка: ${err}`);
       });
   }
+  function handleLogin(email) {
+    setEmail(email);
+    setIsLoggedIn(true);
+  }
+  function handleLogout() {
+    setEmail('')
+    setIsLoggedIn(false);
+    localStorage.removeItem("token");
+    navigate('/');
+  }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
 
-        <Header />
+        <Header email={email} onLogout={handleLogout} />
         <Routes>
           <Route path="/"
             element={
-              <Main
-                cards={cards}
-                onEditProfile={handleEditProfileClick}
-                onEditAvatar={handleEditAvatarClick}
-                onAddPlace={handleAddPlaceClick}
-                onCardClick={handleCardClick}
-                onCardLike={handleCardLike}
-                onCardDelete={handleCardDelete}
-              />
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <Main
+                  cards={cards}
+                  onEditProfile={handleEditProfileClick}
+                  onEditAvatar={handleEditAvatarClick}
+                  onAddPlace={handleAddPlaceClick}
+                  onCardClick={handleCardClick}
+                  onCardLike={handleCardLike}
+                  onCardDelete={handleCardDelete}
+                />
+              </ProtectedRoute>
             }
-          >
-          </Route>
+          />
+
+          <Route
+            path="/sign-up"
+            element={<Register />}
+          />
+
+          <Route
+            path="/sign-in"
+            element={<Login onLogin={handleLogin} />}
+          />
+
         </Routes>
         <Footer />
 

@@ -1,4 +1,3 @@
-
 import { apiConfig } from "./constants";
 
 class Api {
