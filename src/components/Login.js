@@ -35,12 +35,10 @@ function Login({ onLogin }) {
                 <h2 className="login__title">Вход</h2>
                 <form className="login__form" onSubmit={handleSubmit}>
                     <fieldset className="login__inputs">
-                        <input type="email" name="email" ref={emailInputRef} className="login__input" placeholder="E-mail" />
-                        {/* required /> */}
-                        <input type="password" name="password" ref={passwordInputRef} className="login__input" placeholder="Пароль" />
-                        {/* required /> */}
-                        <button type="submit" aria-label="Войти" className="login__button">Войти</button>
+                        <input type="email" name="email" ref={emailInputRef} className="login__input" placeholder="E-mail" required/>
+                        <input type="password" name="password" ref={passwordInputRef} className="login__input" placeholder="Пароль" required/>
                     </fieldset>
+                    <button type="submit" aria-label="Войти" className="login__button">Войти</button>
                 </form>
             </section>
         </main>

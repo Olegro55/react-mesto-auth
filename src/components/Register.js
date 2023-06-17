@@ -1,8 +1,8 @@
 import React from 'react';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import auth from '../utils/auth';
 
-function Register({ }) {
+function Register() {
 
     const navigate = useNavigate();
 
@@ -31,13 +31,12 @@ function Register({ }) {
                 <h2 className="login__title">Регистрация</h2>
                 <form className="login__form" onSubmit={handleSubmit}>
                     <fieldset className="login__inputs">
-                        <input type="email" name="email" ref={emailInputRef} className="login__input" placeholder="E-mail" />
-                        {/* required /> */}
-                        <input type="password" name="password" ref={passwordInputRef} className="login__input" placeholder="Пароль" />
-                        {/* required /> */}
-                        <button type="submit" aria-label="Войти" className="login__button">Зарегистрироваться</button>
+                        <input type="email" name="email" ref={emailInputRef} className="login__input" placeholder="E-mail" required />
+                        <input type="password" name="password" ref={passwordInputRef} className="login__input" placeholder="Пароль" required />
                     </fieldset>
+                    <button type="submit" aria-label="Войти" className="login__button">Зарегистрироваться</button>
                 </form>
+                <Link className="login__link" to="/sign-in">Уже зарегистрированы? Войти</Link>
             </section>
         </main>
     );
