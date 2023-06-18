@@ -1,26 +1,26 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
+import { useForm } from './useForm';
 import auth from '../utils/auth';
 
 function Login({ onLogin }) {
 
     const navigate = useNavigate();
-
-    const emailInputRef = React.useRef();
-    const passwordInputRef = React.useRef();
+    const defaultInputs = {
+        email: '',
+        password: ''
+    };
+    const { values, handleChange } = useForm(defaultInputs);
 
     function handleSubmit(event) {
         event.preventDefault();
-        const inputs = {
-            email: emailInputRef.current.value,
-            password: passwordInputRef.current.value
-        };
+
         auth
-            .authorize(inputs)
+            .authorize(values)
             .then((data) => {
                 if (data.token) {
                     localStorage.setItem('token', data.token);
-                    onLogin(inputs.email);
+                    onLogin(values.email);
                     navigate("/");
                 }
             })
@@ -35,8 +35,8 @@ function Login({ onLogin }) {
                 <h2 className="login__title">Вход</h2>
                 <form className="login__form" onSubmit={handleSubmit}>
                     <fieldset className="login__inputs">
-                        <input type="email" name="email" ref={emailInputRef} className="login__input" placeholder="E-mail" required/>
-                        <input type="password" name="password" ref={passwordInputRef} className="login__input" placeholder="Пароль" required/>
+                        <input type="email" name="email" value={values.email} onChange={handleChange} className="login__input" placeholder="E-mail" required />
+                        <input type="password" name="password" value={values.password} onChange={handleChange} className="login__input" placeholder="Пароль" required />
                     </fieldset>
                     <button type="submit" aria-label="Войти" className="login__button">Войти</button>
                 </form>
