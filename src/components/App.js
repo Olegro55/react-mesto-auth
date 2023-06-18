@@ -19,11 +19,13 @@ import auth from '../utils/auth';
 import success from '../images/success.png';
 import error from '../images/error.png';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
+import { AppContext } from '../contexts/AppContext';
 
 function App() {
 
   const navigate = useNavigate();
 
+  const [isLoading, setIsLoading] = React.useState(false);
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = React.useState(false);
   const [isAddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false);
@@ -97,35 +99,36 @@ function App() {
         console.error(`Ошибка: ${err}`);
       });
   }
-  function handleUpdateUser(data) {
-    api.setUserInfo(data)
-      .then((userData) => {
-        setCurrentUser(userData);
+  function handleSubmit(request) {
+    setIsLoading(true);
+    request()
+      .then(() => {
         closeAllPopups();
       })
       .catch((err) => {
         console.error(`Ошибка: ${err}`);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
+  }
+  function handleUpdateUser(data) {
+    function makeRequest() {
+      return api.setUserInfo(data).then((userData) => { setCurrentUser(userData); });
+    }
+    handleSubmit(makeRequest);
   }
   function handleUpdateAvatar(data) {
-    api.setUserImage(data)
-      .then((userData) => {
-        setCurrentUser(userData);
-        closeAllPopups();
-      })
-      .catch((err) => {
-        console.error(`Ошибка: ${err}`);
-      });
+    function makeRequest() {
+      return api.setUserImage(data).then((userData) => { setCurrentUser(userData); });
+    }
+    handleSubmit(makeRequest);
   }
   function handleAddPlace(data) {
-    api.addCard(data)
-      .then((cardData) => {
-        setCards([cardData, ...cards]);
-        closeAllPopups();
-      })
-      .catch((err) => {
-        console.error(`Ошибка: ${err}`);
-      });
+    function makeRequest() {
+      return api.addCard(data).then((cardData) => { setCards([cardData, ...cards]); });
+    }
+    handleSubmit(makeRequest);
   }
   function handleRegistration(values) {
     auth
@@ -170,52 +173,54 @@ function App() {
   }
 
   return (
-    <CurrentUserContext.Provider value={currentUser}>
-      <div className="page">
+    <AppContext.Provider value={{ isLoading }}>
+      <CurrentUserContext.Provider value={currentUser}>
+        <div className="page">
 
-        <Header email={email} onLogout={handleLogout} />
-        <Routes>
-          <Route path="/"
-            element={
-              <ProtectedRoute isLoggedIn={isLoggedIn}>
-                <Main
-                  cards={cards}
-                  onEditProfile={handleEditProfileClick}
-                  onEditAvatar={handleEditAvatarClick}
-                  onAddPlace={handleAddPlaceClick}
-                  onCardClick={handleCardClick}
-                  onCardLike={handleCardLike}
-                  onCardDelete={handleCardDelete}
-                />
-              </ProtectedRoute>
-            }
-          />
+          <Header email={email} onLogout={handleLogout} />
+          <Routes>
+            <Route path="/"
+              element={
+                <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <Main
+                    cards={cards}
+                    onEditProfile={handleEditProfileClick}
+                    onEditAvatar={handleEditAvatarClick}
+                    onAddPlace={handleAddPlaceClick}
+                    onCardClick={handleCardClick}
+                    onCardLike={handleCardLike}
+                    onCardDelete={handleCardDelete}
+                  />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/sign-up"
-            element={<Register onRegistration={handleRegistration} />}
-          />
+            <Route
+              path="/sign-up"
+              element={<Register onRegistration={handleRegistration} />}
+            />
 
-          <Route
-            path="/sign-in"
-            element={<Login onLogin={handleLogin} />}
-          />
+            <Route
+              path="/sign-in"
+              element={<Login onLogin={handleLogin} />}
+            />
 
-        </Routes>
-        <Footer />
+          </Routes>
+          <Footer />
 
-        <EditProfilePopup isOpened={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
-        <EditAvatarPopup isOpened={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
+          <EditProfilePopup isOpened={isEditProfilePopupOpen} onClose={closeAllPopups} onUpdateUser={handleUpdateUser} />
+          <EditAvatarPopup isOpened={isEditAvatarPopupOpen} onClose={closeAllPopups} onUpdateAvatar={handleUpdateAvatar} />
 
-        <PopupWithForm name="confirm-deletion" title="Вы уверены?" buttonText="Да" />
+          <PopupWithForm name="confirm-deletion" title="Вы уверены?" buttonText="Да" />
 
-        <AddPlacePopup isOpened={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlace} />
+          <AddPlacePopup isOpened={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlace} />
 
-        <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+          <ImagePopup card={selectedCard} onClose={closeAllPopups} />
 
-        <InfoTooltip isOpened={isInfoTooltipOpen} onClose={closeAllPopups} info={registrationResult} />
-      </div>
-    </CurrentUserContext.Provider>
+          <InfoTooltip isOpened={isInfoTooltipOpen} onClose={closeAllPopups} info={registrationResult} />
+        </div>
+      </CurrentUserContext.Provider>
+    </AppContext.Provider>
   );
 }
 
