@@ -9,6 +9,7 @@ import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import ImagePopup from './ImagePopup';
+import InfoTooltip from './InfoTooltip';
 import Register from "./Register";
 import Login from "./Login";
 import ProtectedRoute from "./ProtectedRoute";
@@ -24,6 +25,7 @@ function App() {
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = React.useState(false);
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = React.useState(false);
   const [isAddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false);
+  const [isInfoTooltipOpen, setInfoTooltipOpen] = React.useState(false);
   const [selectedCard, setSelectedCard] = React.useState({});
   const [currentUser, setCurrentUser] = React.useState({
     name: '',
@@ -33,6 +35,7 @@ function App() {
   const [cards, setCards] = React.useState([]);
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [email, setEmail] = React.useState('');
+  const [registrationResult, setRegistrationResult] = React.useState({ icon: '', title: '' });
 
   React.useEffect(() => {
     const token = localStorage.getItem("token");
@@ -68,6 +71,7 @@ function App() {
     setEditProfilePopupOpen(false);
     setEditAvatarPopupOpen(false);
     setAddPlacePopupOpen(false);
+    setInfoTooltipOpen(false);
     setSelectedCard({});
   }
   function handleCardClick(card) { setSelectedCard(card) }
@@ -121,6 +125,10 @@ function App() {
         console.error(`Ошибка: ${err}`);
       });
   }
+  function handleRegistration(result) {
+    setRegistrationResult(result)
+    setInfoTooltipOpen(true);
+  }
   function handleLogin(email) {
     setEmail(email);
     setIsLoggedIn(true);
@@ -156,7 +164,7 @@ function App() {
 
           <Route
             path="/sign-up"
-            element={<Register />}
+            element={<Register onRegistration={handleRegistration} />}
           />
 
           <Route
@@ -175,6 +183,8 @@ function App() {
         <AddPlacePopup isOpened={isAddPlacePopupOpen} onClose={closeAllPopups} onAddPlace={handleAddPlace} />
 
         <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+
+        <InfoTooltip isOpened={isInfoTooltipOpen} onClose={closeAllPopups} info={registrationResult} />
       </div>
     </CurrentUserContext.Provider>
   );

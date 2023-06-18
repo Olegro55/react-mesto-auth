@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import auth from '../utils/auth';
-
-function Register() {
+import success from '../images/success.png';
+import error from '../images/error.png';
+function Register({ onRegistration }) {
 
     const navigate = useNavigate();
 
@@ -18,9 +19,17 @@ function Register() {
         auth
             .register(inputs)
             .then(_ => {
+                onRegistration({
+                    icon: success,
+                    title: 'Вы успешно зарегистрировались!'
+                });
                 navigate('/sign-in');
             })
             .catch((err) => {
+                onRegistration({
+                    icon: error,
+                    title: 'Что-то пошло не так! Попробуйте ещё раз.'
+                });
                 console.error(`Ошибка: ${err}`);
             });
     }
