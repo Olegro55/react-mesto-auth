@@ -16,6 +16,8 @@ import ProtectedRoute from "./ProtectedRoute";
 
 import api from '../utils/api';
 import auth from '../utils/auth';
+import success from '../images/success.png';
+import error from '../images/error.png';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 
 function App() {
@@ -125,13 +127,40 @@ function App() {
         console.error(`Ошибка: ${err}`);
       });
   }
-  function handleRegistration(result) {
-    setRegistrationResult(result)
-    setInfoTooltipOpen(true);
+  function handleRegistration(values) {
+    auth
+      .register(values)
+      .then(_ => {
+        setRegistrationResult({
+          icon: success,
+          title: 'Вы успешно зарегистрировались!'
+        })
+        setInfoTooltipOpen(true);
+        navigate('/sign-in');
+      })
+      .catch((err) => {
+        setRegistrationResult({
+          icon: error,
+          title: 'Что-то пошло не так! Попробуйте ещё раз.'
+        })
+        setInfoTooltipOpen(true);
+        console.error(`Ошибка: ${err}`);
+      });
   }
-  function handleLogin(email) {
-    setEmail(email);
-    setIsLoggedIn(true);
+  function handleLogin(inputs) {
+    auth
+      .authorize(inputs)
+      .then((data) => {
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          setEmail(inputs.email);
+          setIsLoggedIn(true);
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        console.error(`Ошибка: ${err}`);
+      });
   }
   function handleLogout() {
     setEmail('')

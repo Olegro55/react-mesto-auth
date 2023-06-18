@@ -1,11 +1,8 @@
 import React from 'react';
-import { useNavigate } from "react-router-dom";
 import { useForm } from './useForm';
-import auth from '../utils/auth';
 
 function Login({ onLogin }) {
 
-    const navigate = useNavigate();
     const defaultInputs = {
         email: '',
         password: ''
@@ -15,18 +12,7 @@ function Login({ onLogin }) {
     function handleSubmit(event) {
         event.preventDefault();
 
-        auth
-            .authorize(values)
-            .then((data) => {
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    onLogin(values.email);
-                    navigate("/");
-                }
-            })
-            .catch((err) => {
-                console.error(`Ошибка: ${err}`);
-            });
+        onLogin(values);
     }
 
     return (
